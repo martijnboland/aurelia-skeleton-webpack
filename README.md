@@ -2,7 +2,7 @@
 Aurelia Skeleton app that uses webpack for loading, building and bundling instead of SystemJS/JSPM
 
 ## Getting started
-Clone this repository, go to the directory and then hit
+Clone this repository, go to the directory where your clone is located and then hit
 
 ```
 npm install
