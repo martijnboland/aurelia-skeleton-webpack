@@ -18,14 +18,14 @@ module.exports = {
     filename: 'bundle.js'
   },
   plugins: [
-     new webpack.DefinePlugin({
-       __APP_SRC__:  JSON.stringify('../src')
-     })
+    new webpack.DefinePlugin({
+      __APP_SRC__: JSON.stringify(path.resolve('./src'))
+    })
   ],
   resolve: {
-    alias: {
-      bootstrap: 'bootstrap/dist'
-    }
+    root: [
+      path.resolve('./'),
+    ]
   },
   module: {
     loaders: [
