@@ -1,4 +1,4 @@
-import * as aureliaBootstrapper from 'aurelia-bootstrapper';
+import 'aurelia-bootstrapper';
 import '../loader/aurelia-loader-webpack';
 
 require('../node_modules/bootstrap/dist/css/bootstrap.css');
