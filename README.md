@@ -16,16 +16,14 @@ npm run dev
 
 You can now browse the skeleton app at http://localhost:3000.
 
-To make a development bundle, enter
+To make a development bundle (output to /build):
 
 ```
 npm run build
 ```
 
-To make a production build, enter
+To make a production bundle (output to /dist):
 
 ```
 npm run prod
 ```
-
-The production build output is located in /dist
