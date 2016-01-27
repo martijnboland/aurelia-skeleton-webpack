@@ -21,7 +21,12 @@ module.exports = {
     new webpack.DefinePlugin({
       __APP_SRC__: JSON.stringify(path.resolve('./src')),
       __MODULES_ROOT__: JSON.stringify(path.resolve('./node_modules'))
-    })
+    }),
+    new webpack.ContextReplacementPlugin(
+                /\./, 
+                'node_modules',
+                true,
+                /aurelia-[^\/]+\/dist\/commonjs\/.*\.js$/)
   ],
   resolve: {
     root: [

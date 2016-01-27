@@ -62,9 +62,7 @@ export class WebpackLoader extends Loader {
         let entry = that.getOrCreateTemplateRegistryEntry(address);
         return entry.templateIsLoaded ? entry : that.templateLoader.loadTemplate(that, entry).then(x => entry);
       }
-    });
-    
-    this.aureliaRequire = require.context(`${__MODULES_ROOT__}`, true, /aurelia-[^\/]+\/dist\/commonjs\/.*\.js$/)
+    });    
   }
 
   _initModuleRegistry() {   
@@ -95,13 +93,12 @@ export class WebpackLoader extends Loader {
           // Check for an aurelia module key. These start with aurelia. If so, whe have to
           // rewrite the path
           if (path.startsWith('aurelia-')) {
+                        
             const pathParts = path.split('/');
-            
-            if (pathParts.length > 1) {
-              m = this.aureliaRequire(`./${pathParts[0]}/dist/commonjs/${pathParts[1]}.js`);  
-            } else {
-              m = this.aureliaRequire(`./${pathParts[0]}/dist/commonjs/${pathParts[0]}.js`);
-            }
+            const fullPath = (pathParts.length > 1) 
+              ? `./${pathParts[0]}/dist/commonjs/${pathParts[1]}.js`
+              : `./${pathParts[0]}/dist/commonjs/${pathParts[0]}.js`;
+            m = require(fullPath);
           }
           else {
             m = require(`${__APP_SRC__}/${path}`);          
