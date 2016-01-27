@@ -19,7 +19,8 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      __APP_SRC__: JSON.stringify(path.resolve('./src'))
+      __APP_SRC__: JSON.stringify(path.resolve('./src')),
+      __MODULES_ROOT__: JSON.stringify(path.resolve('./node_modules'))
     })
   ],
   resolve: {

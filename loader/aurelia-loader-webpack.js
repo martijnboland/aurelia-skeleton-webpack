@@ -1,7 +1,6 @@
 import {Origin} from 'aurelia-metadata';
 import {TemplateRegistryEntry, Loader} from 'aurelia-loader';
 import {DOM, PLATFORM} from 'aurelia-pal';
-import getAureliaModules from 'webpack-aurelia-moduleregistry';
 
 /**
 * An implementation of the TemplateLoader interface implemented with text-based loading.
@@ -53,7 +52,7 @@ export class WebpackLoader extends Loader {
 
     this.moduleRegistry = {};
     this.loaderPlugins = {}; 
-    this._initModuleRegistry();
+    //this._initModuleRegistry();
     this.useTemplateLoader(new TextTemplateLoader());
 
     let that = this;
@@ -64,6 +63,8 @@ export class WebpackLoader extends Loader {
         return entry.templateIsLoaded ? entry : that.templateLoader.loadTemplate(that, entry).then(x => entry);
       }
     });
+    
+    this.aureliaRequire = require.context(`${__MODULES_ROOT__}`, true, /aurelia-[^\/]+\/dist\/commonjs\/.*\.js$/)
   }
 
   _initModuleRegistry() {   
@@ -91,7 +92,20 @@ export class WebpackLoader extends Loader {
           m = this.loaderPlugins[loaderPlugin].fetch(path);
         }
         else {
-          m = require(`${__APP_SRC__}/${path}`);        
+          // Check for an aurelia module key. These start with aurelia. If so, whe have to
+          // rewrite the path
+          if (path.startsWith('aurelia-')) {
+            const pathParts = path.split('/');
+            
+            if (pathParts.length > 1) {
+              m = this.aureliaRequire(`./${pathParts[0]}/dist/commonjs/${pathParts[1]}.js`);  
+            } else {
+              m = this.aureliaRequire(`./${pathParts[0]}/dist/commonjs/${pathParts[0]}.js`);
+            }
+          }
+          else {
+            m = require(`${__APP_SRC__}/${path}`);          
+          }
         }
         resolve(m);
       } catch (e) {
