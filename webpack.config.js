@@ -1,6 +1,23 @@
 var path = require('path');
+var fileSystem = require('fs');
 var webpack = require('webpack');
+var ContextReplacementPlugin = require('./loader/ContextReplacementPlugin');
+var pkg = require('./package.json');
 
+var vendorPackages = Object.keys(pkg.dependencies).filter(function(el) {
+  return el.indexOf('font') === -1; // exclude font packages from vendor bundle
+});
+    
+var createContextMap = function(fs, callback) {
+  var contextMap = {};
+  vendorPackages.forEach(function(moduleId) {
+    var vendorPkgPath = path.resolve(__dirname, 'node_modules', moduleId, 'package.json');
+    var vendorPkg = JSON.parse(fileSystem.readFileSync(vendorPkgPath, 'utf8'));
+    contextMap[moduleId] = path.resolve(__dirname, 'node_modules', moduleId, vendorPkg.browser || vendorPkg.main);
+  });
+  callback(null, contextMap);
+};    
+    
 module.exports = {
   devServer: {
     host: 'localhost',
@@ -19,18 +36,21 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      __APP_SRC__: JSON.stringify(path.resolve('./src')),
-      __MODULES_ROOT__: JSON.stringify(path.resolve('./node_modules'))
+      __APP_SRC__: JSON.stringify(path.resolve('./src'))
     }),
-    new webpack.ContextReplacementPlugin(
-                /\./, 
-                'node_modules',
-                true,
-                /aurelia-[^\/]+\/dist\/commonjs\/.*\.js$/)
+    new ContextReplacementPlugin(
+      /loader$/, 
+      '',
+      createContextMap
+    ),
+    // new webpack.ContextReplacementPlugin(
+    //   /src-context$/, 
+    //   path.resolve('./src')
+    // )
   ],
   resolve: {
     root: [
-      path.resolve('./'),
+      path.resolve('./src'),
     ]
   },
   module: {

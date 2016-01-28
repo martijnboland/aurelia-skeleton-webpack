@@ -52,7 +52,6 @@ export class WebpackLoader extends Loader {
 
     this.moduleRegistry = {};
     this.loaderPlugins = {}; 
-    //this._initModuleRegistry();
     this.useTemplateLoader(new TextTemplateLoader());
 
     let that = this;
@@ -62,20 +61,12 @@ export class WebpackLoader extends Loader {
         let entry = that.getOrCreateTemplateRegistryEntry(address);
         return entry.templateIsLoaded ? entry : that.templateLoader.loadTemplate(that, entry).then(x => entry);
       }
-    });    
-  }
-
-  _initModuleRegistry() {   
-    const modules = getAureliaModules();
-    for (var moduleName in modules) {
-      this._registerModule(moduleName, modules[moduleName]);
-    }     
+    });
+    
+    this.srcContextRequire = require.context(`${__APP_SRC__}`, true);
+    this.srcContextKeys = this.srcContextRequire.keys();
   }
   
-  _registerModule(name, module) {
-    this.moduleRegistry[name] = ensureOriginOnExports(module, name);
-  }
-
   _import(moduleId) {
     
     const moduleIdParts = moduleId.split('!');
@@ -88,20 +79,14 @@ export class WebpackLoader extends Loader {
         
         if (loaderPlugin) {
           m = this.loaderPlugins[loaderPlugin].fetch(path);
-        }
+        } 
         else {
-          // Check for an aurelia module key. These start with aurelia. If so, whe have to
-          // rewrite the path
-          if (path.startsWith('aurelia-')) {
-                        
-            const pathParts = path.split('/');
-            const fullPath = (pathParts.length > 1) 
-              ? `./${pathParts[0]}/dist/commonjs/${pathParts[1]}.js`
-              : `./${pathParts[0]}/dist/commonjs/${pathParts[0]}.js`;
-            m = require(fullPath);
-          }
+          const srcPath = './' + path;
+          if (this.srcContextKeys.indexOf(srcPath) > -1) {
+            m = this.srcContextRequire(srcPath);
+          } 
           else {
-            m = require(`${__APP_SRC__}/${path}`);          
+            m = require(path);          
           }
         }
         resolve(m);
