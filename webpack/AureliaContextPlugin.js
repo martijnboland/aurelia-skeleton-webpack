@@ -1,45 +1,22 @@
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
+  Based on ContextReplacementPlugin by Tobias Koppers @sokra
 */
 var path = require("path");
-var ContextElementDependency = require('webpack/lib/dependencies/ContextElementDependency');
 var fileSystem = require('fs');
+var ContextElementDependency = require('webpack/lib/dependencies/ContextElementDependency');
 
-function ContextReplacementPlugin(resourceRegExp, newContentResource, newContentRecursive, newContentRegExp) {  
+function AureliaContextPlugin(resourceRegExp, newContentResource, createContextMap) {  
 	this.resourceRegExp = resourceRegExp;
-	if(typeof newContentResource === "function") {
-		this.newContentCallback = newContentResource;
-	} else if(typeof newContentResource === "string" && typeof newContentRecursive === "object") {
-		this.newContentResource = newContentResource;
-		this.newContentCreateContextMap = function(fs, callback) {
-			callback(null, newContentRecursive)
-		};
-	} else if(typeof newContentResource === "string" && typeof newContentRecursive === "function") {
-		this.newContentResource = newContentResource;
-		this.newContentCreateContextMap = newContentRecursive;
-	} else {
-		if(typeof newContentResource !== "string") {
-			newContentRegExp = newContentRecursive;
-			newContentRecursive = newContentResource;
-			newContentResource = undefined;
-		}
-		if(typeof newContentRecursive !== "boolean") {
-			newContentRegExp = newContentRecursive;
-			newContentRecursive = undefined;
-		}
-		this.newContentResource = newContentResource;
-		this.newContentRecursive = newContentRecursive;
-		this.newContentRegExp = newContentRegExp;
-	}
+  this.newContentResource = newContentResource;
+  this.newContentCreateContextMap = createContextMap;
 }
-module.exports = ContextReplacementPlugin;
-ContextReplacementPlugin.prototype.apply = function(compiler) {
+
+module.exports = AureliaContextPlugin;
+
+AureliaContextPlugin.prototype.apply = function(compiler) {
 	var resourceRegExp = this.resourceRegExp;
-	var newContentCallback = this.newContentCallback;
 	var newContentResource = this.newContentResource;
-	var newContentRecursive = this.newContentRecursive;
-	var newContentRegExp = this.newContentRegExp;
 	var newContentCreateContextMap = this.newContentCreateContextMap;
 	compiler.plugin("context-module-factory", function(cmf) {
 		cmf.plugin("before-resolve", function(result, callback) {
@@ -47,13 +24,6 @@ ContextReplacementPlugin.prototype.apply = function(compiler) {
 			if(resourceRegExp.test(result.request)) {
 				if(typeof newContentResource !== "undefined")
 					result.request = newContentResource;
-				if(typeof newContentRecursive !== "undefined")
-					result.recursive = newContentRecursive;
-				if(typeof newContentRegExp !== "undefined")
-					result.regExp = newContentRegExp;
-				if(typeof newContentCallback === "function") {
-					newContentCallback(result);
-				}
 			}
 			return callback(null, result);
 		});
@@ -80,7 +50,9 @@ function createResolveDependenciesFromContextMap(createContextMap, originalResol
         Object.keys(map).forEach(function(key) {
           // Add main module as dependency
           dependencies.push(new ContextElementDependency(key, './' + key));
-          // Also include all other modules as subdependencies when it is an aurelia module.
+          // Also include all other modules as subdependencies when it is an aurelia module. This is required
+          // because Aurelia submodules are not in the root of the NPM package and thus cannot be loaded 
+          // directly like import 'aurelia-templating-resources/compose'
           if (key.startsWith('aurelia-')) {
             var mainDir = path.dirname(map[key]);
             var mainFileName = path.basename(map[key]);

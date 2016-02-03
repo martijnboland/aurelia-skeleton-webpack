@@ -2,7 +2,7 @@ var path = require('path');
 var fileSystem = require('fs');
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ContextReplacementPlugin = require('./loader/ContextReplacementPlugin');
+var AureliaContextPlugin = require('./webpack/AureliaContextPlugin');
 
 var pkg = require('./package.json');
 
@@ -34,7 +34,7 @@ module.exports = {
     chunkFilename: '[id]' + outputFileTemplateSuffix + '.js'
   },
   plugins: [
-    new ContextReplacementPlugin(
+    new AureliaContextPlugin(
       /aurelia-loader-context/, 
       path.resolve('./src'),
       createContextMap

@@ -1,5 +1,5 @@
 import 'aurelia-bootstrapper';
-import '../loader/aurelia-loader-webpack';
+import 'aurelia-loader-webpack';
 
 require('../node_modules/bootstrap/dist/css/bootstrap.css');
 require('../node_modules/font-awesome/css/font-awesome.css');

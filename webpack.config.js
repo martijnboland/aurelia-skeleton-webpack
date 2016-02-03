@@ -1,7 +1,7 @@
 var path = require('path');
 var fileSystem = require('fs');
 var webpack = require('webpack');
-var ContextReplacementPlugin = require('./loader/ContextReplacementPlugin');
+var AureliaContextPlugin = require('./webpack/AureliaContextPlugin');
 var pkg = require('./package.json');
 
 var vendorPackages = Object.keys(pkg.dependencies).filter(function(el) {
@@ -35,9 +35,9 @@ module.exports = {
     filename: 'bundle.js'
   },
   plugins: [
-    new ContextReplacementPlugin(
+    new AureliaContextPlugin(
       /aurelia-loader-context/, 
-      'bundle?lazy!' + path.resolve('./src'),
+      path.resolve('./src'),
       createContextMap
     )
   ],
