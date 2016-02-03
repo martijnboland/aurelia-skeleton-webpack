@@ -59,22 +59,9 @@ ContextReplacementPlugin.prototype.apply = function(compiler) {
 		});
 		cmf.plugin("after-resolve", function(result, callback) {
 			if(!result) return callback();
-			if(newContentResource === result.resource) {
-				if(typeof newContentResource !== "undefined")
-					result.resource = path.resolve(result.resource, newContentResource);
-				if(typeof newContentRecursive !== "undefined")
-					result.recursive = newContentRecursive;
-				if(typeof newContentRegExp !== "undefined")
-					result.regExp = newContentRegExp;
+			if(newContentResource.endsWith(result.resource)) {
 				if(typeof newContentCreateContextMap === "function")
 					result.resolveDependencies = createResolveDependenciesFromContextMap(newContentCreateContextMap, result.resolveDependencies);
-				if(typeof newContentCallback === "function") {
-					var origResource = result.resource;
-					newContentCallback(result);
-					if(result.resource !== origResource) {
-						result.resource = path.resolve(origResource, result.resource);
-					}
-				}
 			}
 			return callback(null, result);
 		});

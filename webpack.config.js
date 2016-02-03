@@ -37,13 +37,9 @@ module.exports = {
   plugins: [
     new ContextReplacementPlugin(
       /aurelia-loader-context/, 
-      path.resolve('./src'),
+      'bundle?lazy!' + path.resolve('./src'),
       createContextMap
-    ),
-    // new webpack.ContextReplacementPlugin(
-    //   /src-context$/, 
-    //   path.resolve('./src')
-    // )
+    )
   ],
   resolve: {
     root: [

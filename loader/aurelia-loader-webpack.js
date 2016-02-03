@@ -79,14 +79,18 @@ export class WebpackLoader extends Loader {
           resolve(this.loaderPlugins[loaderPlugin].fetch(path));
         } 
         else {
-          // const srcPath = './' + path;
-          // if (this.srcContextKeys.indexOf(srcPath) > -1) {
-          //   m = this.srcContextRequire(srcPath);
-          // } 
-          // else {
+          // var bundledResult = require('bundle?lazy!aurelia-loader-context/' + path);
+          // bundledResult(function(result) { resolve(result); });
+
           require.ensure([], function (require) {
-            resolve(require('aurelia-loader-context/' + path));
-          })          
+            const result = require('aurelia-loader-context/' + path);
+            if (typeof(result) === 'function') { // because of async loading
+              result(res => resolve(res));
+            }
+            else {
+              resolve(result);
+            }
+          });
         }
       } catch (e) {
         reject(e);
