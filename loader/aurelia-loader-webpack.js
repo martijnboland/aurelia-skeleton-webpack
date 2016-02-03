@@ -63,8 +63,8 @@ export class WebpackLoader extends Loader {
       }
     });
     
-    this.srcContextRequire = require.context(`${__APP_SRC__}`, true);
-    this.srcContextKeys = this.srcContextRequire.keys();
+    // this.srcContextRequire = require.context(`${__APP_SRC__}`, true);
+    // this.srcContextKeys = this.srcContextRequire.keys();
   }
   
   _import(moduleId) {
@@ -74,22 +74,20 @@ export class WebpackLoader extends Loader {
     const loaderPlugin = moduleIdParts.length == 1 ? moduleIdParts[0] : null;
          
     return new Promise((resolve, reject) => {
-      try {
-        let m = null;
-        
+      try {        
         if (loaderPlugin) {
-          m = this.loaderPlugins[loaderPlugin].fetch(path);
+          resolve(this.loaderPlugins[loaderPlugin].fetch(path));
         } 
         else {
-          const srcPath = './' + path;
-          if (this.srcContextKeys.indexOf(srcPath) > -1) {
-            m = this.srcContextRequire(srcPath);
-          } 
-          else {
-            m = require(path);          
-          }
+          // const srcPath = './' + path;
+          // if (this.srcContextKeys.indexOf(srcPath) > -1) {
+          //   m = this.srcContextRequire(srcPath);
+          // } 
+          // else {
+          require.ensure([], function (require) {
+            resolve(require('aurelia-loader-context/' + path));
+          })          
         }
-        resolve(m);
       } catch (e) {
         reject(e);
       }

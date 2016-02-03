@@ -59,7 +59,7 @@ ContextReplacementPlugin.prototype.apply = function(compiler) {
 		});
 		cmf.plugin("after-resolve", function(result, callback) {
 			if(!result) return callback();
-			if(resourceRegExp.test(result.resource)) {
+			if(newContentResource === result.resource) {
 				if(typeof newContentResource !== "undefined")
 					result.resource = path.resolve(result.resource, newContentResource);
 				if(typeof newContentRecursive !== "undefined")
@@ -67,7 +67,7 @@ ContextReplacementPlugin.prototype.apply = function(compiler) {
 				if(typeof newContentRegExp !== "undefined")
 					result.regExp = newContentRegExp;
 				if(typeof newContentCreateContextMap === "function")
-					result.resolveDependencies = createResolveDependenciesFromContextMap(newContentCreateContextMap);
+					result.resolveDependencies = createResolveDependenciesFromContextMap(newContentCreateContextMap, result.resolveDependencies);
 				if(typeof newContentCallback === "function") {
 					var origResource = result.resource;
 					newContentCallback(result);
@@ -81,30 +81,35 @@ ContextReplacementPlugin.prototype.apply = function(compiler) {
 	});
 };
 
-function createResolveDependenciesFromContextMap(createContextMap) {
+function createResolveDependenciesFromContextMap(createContextMap, originalResolveDependencies) {
 	return function resolveDependenciesFromContextMap(fs, resource, recursive, regExp, callback) {
-		createContextMap(fs, function(err, map) {
-			if(err) return callback(err);
-      var dependencies = [];
+    
+    originalResolveDependencies(fs, resource, recursive, regExp, function (err, dependencies)  {
+      if(err) return callback(err);
       
-      Object.keys(map).forEach(function(key) {
-        // Add main module as dependency
-        dependencies.push(new ContextElementDependency(key, key));
-        // Also include all other modules as subdependencies when it is an aurelia module.
-        if (key.startsWith('aurelia-')) {
-          var mainDir = path.dirname(map[key]);
-          var mainFileName = path.basename(map[key]);
-          var files = fileSystem.readdirSync(mainDir);
-          files.forEach(function(fileName) {
-            if (fileName.indexOf(mainFileName) === -1 && fileName.match(/[^\.]\.(js|jsx|html|css|less|sass)$/)) {
-              var subModuleKey = key + '/' + path.basename(fileName, path.extname(fileName));
-              dependencies.push(new ContextElementDependency(path.resolve(mainDir, fileName), subModuleKey));
-            } 
-          });          
-        }
-      });
-      
-			callback(null, dependencies);
-		});
+      createContextMap(fs, function(err, map) {
+        if(err) return callback(err);
+        
+        Object.keys(map).forEach(function(key) {
+          // Add main module as dependency
+          dependencies.push(new ContextElementDependency(key, './' + key));
+          // Also include all other modules as subdependencies when it is an aurelia module.
+          if (key.startsWith('aurelia-')) {
+            var mainDir = path.dirname(map[key]);
+            var mainFileName = path.basename(map[key]);
+            var files = fileSystem.readdirSync(mainDir);
+            files.forEach(function(fileName) {
+              if (fileName.indexOf(mainFileName) === -1 && fileName.match(/[^\.]\.(js|jsx|html|css|less|sass)$/)) {
+                var subModuleKey = key + '/' + path.basename(fileName, path.extname(fileName));
+                dependencies.push(new ContextElementDependency(path.resolve(mainDir, fileName), './' + subModuleKey));
+              } 
+            });          
+          }
+        });
+        
+        callback(null, dependencies);
+      });      
+    });
+    
 	}
 };

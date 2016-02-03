@@ -35,12 +35,9 @@ module.exports = {
     filename: 'bundle.js'
   },
   plugins: [
-    new webpack.DefinePlugin({
-      __APP_SRC__: JSON.stringify(path.resolve('./src'))
-    }),
     new ContextReplacementPlugin(
-      /loader$/, 
-      '',
+      /aurelia-loader-context/, 
+      path.resolve('./src'),
       createContextMap
     ),
     // new webpack.ContextReplacementPlugin(
