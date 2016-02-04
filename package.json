@@ -4,7 +4,7 @@
   "description": "An attempt to get a working Aurelia skeleton app with webpack and NPM instead of SystemJS and jspm.",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --config webpack.config.js --hot --progress --colors --devtool eval",
+    "dev": "webpack-dev-server --config webpack.config.js --hot --inline --progress --colors --devtool eval",
     "build": "webpack --config webpack.config.js --progress --profile --colors",
     "prod": "webpack -p --config webpack.prod.config.js --progress --colors --devtool source-map",
     "test": "echo \"Error: no test specified\" && exit 1"
