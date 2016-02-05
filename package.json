@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "aurelia-tools": "^0.1.18",
+    "aurelia-webpack-plugin": "github:martijnboland/aurelia-webpack-plugin",
     "babel-core": "^5.8.35",
     "babel-loader": "^5.4.0",
     "bundle-loader": "^0.5.4",

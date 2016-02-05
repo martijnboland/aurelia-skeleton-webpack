@@ -1,7 +1,7 @@
 var path = require('path');
 var fileSystem = require('fs');
 var webpack = require('webpack');
-var AureliaContextPlugin = require('./webpack/AureliaContextPlugin');
+var AureliaWebpackPlugin = require('aurelia-webpack-plugin');
 var pkg = require('./package.json');
     
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
     filename: 'bundle.js'
   },
   plugins: [
-    new AureliaContextPlugin()
+    new AureliaWebpackPlugin()
   ],
   module: {
     loaders: [
