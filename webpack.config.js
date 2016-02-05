@@ -21,11 +21,6 @@ module.exports = {
   plugins: [
     new AureliaContextPlugin()
   ],
-  resolve: {
-    root: [
-      path.resolve('./src'),
-    ]
-  },
   module: {
     loaders: [
       { test: /\.js$/, loader: 'babel', exclude: /node_modules/, query: {stage: 0} }, 

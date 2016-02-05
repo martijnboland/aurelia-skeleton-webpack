@@ -3,24 +3,20 @@ var fileSystem = require('fs');
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var AureliaContextPlugin = require('./webpack/AureliaContextPlugin');
-
 var pkg = require('./package.json');
 
 var outputFileTemplateSuffix = '-' + pkg.version;
-
 var vendorPackages = Object.keys(pkg.dependencies).filter(function(el) {
   return el.indexOf('font') === -1; // exclude font packages from vendor bundle
+});  
+
+var contextMap = {};
+
+vendorPackages.forEach(function(moduleId) {
+  var vendorPkgPath = path.resolve(__dirname, 'node_modules', moduleId, 'package.json');
+  var vendorPkg = JSON.parse(fileSystem.readFileSync(vendorPkgPath, 'utf8'));
+  contextMap[moduleId] = path.resolve(__dirname, 'node_modules', moduleId, vendorPkg.browser || vendorPkg.main);
 });
-    
-var createContextMap = function(fs, callback) {
-  var contextMap = {};
-  vendorPackages.forEach(function(moduleId) {
-    var vendorPkgPath = path.resolve(__dirname, 'node_modules', moduleId, 'package.json');
-    var vendorPkg = JSON.parse(fileSystem.readFileSync(vendorPkgPath, 'utf8'));
-    contextMap[moduleId] = path.resolve(__dirname, 'node_modules', moduleId, vendorPkg.browser || vendorPkg.main);
-  });
-  callback(null, contextMap);
-};
 
 module.exports = {
   entry: {
@@ -34,7 +30,10 @@ module.exports = {
     chunkFilename: '[id]' + outputFileTemplateSuffix + '.js'
   },
   plugins: [
-    new AureliaContextPlugin(),
+    new AureliaContextPlugin({
+      src: path.resolve('./src'),
+      contextMap: contextMap
+    }),
     new HtmlWebpackPlugin({
       title: 'Aurelia webpack skeleton - ' + pkg.version,
       template: 'index.prod.html',

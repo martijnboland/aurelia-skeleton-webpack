@@ -10,30 +10,30 @@ function AureliaContextPlugin(options) {
   options = options || {};
   options.root = options.root || path.dirname(module.parent.filename);
   options.src = options.src || path.resolve(options.root, 'src');
-  options.resourceRegExp = options.resourceExp || /aurelia-loader-context/;
+  options.resourceRegExp = options.resourceRegExp || /aurelia-loader-context/;
   
   this.options = options;
   
-  if (this.options.contextMap) {
+  if (options.contextMap) {
     this.createContextMap = function(fs, callback) {
       callback(null, this.options.contextMap);
-    };
+    }.bind(this);
   } else {
     this.createContextMap = function(fs, callback) {
       var self = this;
       var contextMap = {};
           // No context map supplied, let's create a default map from all dependencies in package.json
       var pkg = JSON.parse(fileSystem.readFileSync(path.resolve(self.options.root, 'package.json')));
-      var vendorPackages = Object.keys(pkg.dependencies).filter(function(el) {
-        return el.indexOf('font') === -1; // exclude font packages from vendor bundle
-      });
+      var vendorPackages = Object.keys(pkg.dependencies);
       vendorPackages.forEach(function(moduleId) {
         // We're storing the complete path to the package entry file in the context map. This is not
         // required directly, but we need it to resolve aurelia's submodules.
         var vendorPath = path.resolve(self.options.root, 'node_modules', moduleId);
         var vendorPkgPath = path.resolve(vendorPath, 'package.json');
         var vendorPkg = JSON.parse(fileSystem.readFileSync(vendorPkgPath, 'utf8'));
-        contextMap[moduleId] = path.resolve(vendorPath, vendorPkg.browser || vendorPkg.main);
+        if (vendorPkg.browser || vendorPkg.main) {
+          contextMap[moduleId] = path.resolve(vendorPath, vendorPkg.browser || vendorPkg.main);        
+        }
       });
       callback(null, contextMap);
     }.bind(this);
