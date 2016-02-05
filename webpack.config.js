@@ -3,20 +3,6 @@ var fileSystem = require('fs');
 var webpack = require('webpack');
 var AureliaContextPlugin = require('./webpack/AureliaContextPlugin');
 var pkg = require('./package.json');
-
-var vendorPackages = Object.keys(pkg.dependencies).filter(function(el) {
-  return el.indexOf('font') === -1; // exclude font packages from vendor bundle
-});
-    
-var createContextMap = function(fs, callback) {
-  var contextMap = {};
-  vendorPackages.forEach(function(moduleId) {
-    var vendorPkgPath = path.resolve(__dirname, 'node_modules', moduleId, 'package.json');
-    var vendorPkg = JSON.parse(fileSystem.readFileSync(vendorPkgPath, 'utf8'));
-    contextMap[moduleId] = path.resolve(__dirname, 'node_modules', moduleId, vendorPkg.browser || vendorPkg.main);
-  });
-  callback(null, contextMap);
-};    
     
 module.exports = {
   devServer: {
@@ -25,8 +11,6 @@ module.exports = {
   },
   entry: {
     main: [
-//      'webpack-dev-server/client?http://localhost:3000',
-//      'webpack/hot/only-dev-server',
       './src/main'
     ]
   },
@@ -35,11 +19,7 @@ module.exports = {
     filename: 'bundle.js'
   },
   plugins: [
-    new AureliaContextPlugin(
-      /aurelia-loader-context/, 
-      path.resolve('./src'),
-      createContextMap
-    )
+    new AureliaContextPlugin()
   ],
   resolve: {
     root: [

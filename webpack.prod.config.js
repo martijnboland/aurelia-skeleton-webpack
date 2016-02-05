@@ -34,15 +34,11 @@ module.exports = {
     chunkFilename: '[id]' + outputFileTemplateSuffix + '.js'
   },
   plugins: [
-    new AureliaContextPlugin(
-      /aurelia-loader-context/, 
-      path.resolve('./src'),
-      createContextMap
-    ),
+    new AureliaContextPlugin(),
     new HtmlWebpackPlugin({
-        title: 'Aurelia webpack skeleton - ' + pkg.version,
-        template: 'index.prod.html',
-        filename: 'index.html'
+      title: 'Aurelia webpack skeleton - ' + pkg.version,
+      template: 'index.prod.html',
+      filename: 'index.html'
     })
   ],
   resolve: {
